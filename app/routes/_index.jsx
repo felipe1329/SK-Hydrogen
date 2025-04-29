@@ -1,7 +1,9 @@
 import {Await, useLoaderData, Link} from '@remix-run/react';
-import {Suspense} from 'react';
+import {Suspense,useState} from 'react';
 import {Image} from '@shopify/hydrogen';
 import {ProductItem} from '~/components/ProductItem';
+import 'keen-slider/keen-slider.min.css';
+import {useKeenSlider} from 'keen-slider/react';
 
 /**
  * @type {MetaFunction}
@@ -99,22 +101,79 @@ function FeaturedCollection({collection}) {
  * }}
  */
 function RecommendedProducts({products}) {
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [sliderRef, instanceRef] = useKeenSlider({
+    loop: true,
+    slides: {
+      perView: 2,
+      spacing: 15,
+    },
+    breakpoints: {
+      '(min-width: 768px)': {
+        slides: { perView: 4, spacing: 20 },
+      },
+      '(min-width: 1024px)': {
+        slides: { perView: 4, spacing: 25 },
+      },
+    },
+    slideChanged(slider) {
+      setCurrentSlide(slider.track.details.rel);
+    },
+  });
   return (
-    <div className="recommended-products">
-      <h2>Recommended Products</h2>
+    <div className="recommended-products relative">
+      <h2 className="text-2xl font-bold mb-4">Recommended Products</h2>
+
       <Suspense fallback={<div>Loading...</div>}>
         <Await resolve={products}>
           {(response) => (
-            <div className="recommended-products-grid">
-              {response
-                ? response.products.nodes.map((product) => (
-                    <ProductItem key={product.id} product={product} />
-                  ))
-                : null}
-            </div>
+            <>
+              <div ref={sliderRef} className="keen-slider">
+                {response
+                  ? response.products.nodes.map((product) => (
+                      <div key={product.id} className="keen-slider__slide">
+                        <ProductItem product={product} />
+                      </div>
+                    ))
+                  : null}
+              </div>
+
+              {/* Flechas */}
+              <button
+                onClick={() => instanceRef.current?.prev()}
+                className="absolute top-1/2 left-2 transform -translate-y-1/2 bg-white/70 p-2 rounded-full shadow-md cursor-pointer"
+              >
+                ◀
+              </button>
+              <button
+                onClick={() => instanceRef.current?.next()}
+                className="absolute top-1/2 right-2 transform -translate-y-1/2 bg-white/70 p-2 rounded-full shadow-md cursor-pointer"
+              >
+                ▶
+              </button>
+
+              {/* Dots */}
+              <div className="flex justify-center mt-4 space-x-2">
+                {Array.from(
+                  {length: response.products.nodes.length},
+                  (_, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => instanceRef.current?.moveToIdx(idx)}
+                      className={`w-2.5 h-2.5 rounded-full ${
+                        currentSlide === idx
+                          ? 'bg-gray-900'
+                          : 'bg-gray-400'
+                      }`}
+                    />
+                  )
+                )}
+              </div>
+            </>
           )}
         </Await>
       </Suspense>
+
       <br />
     </div>
   );
@@ -160,6 +219,11 @@ const RECOMMENDED_PRODUCTS_QUERY = `#graphql
       altText
       width
       height
+    }
+    variants(first: 1) {
+      nodes {
+        id
+      }
     }
   }
   query RecommendedProducts ($country: CountryCode, $language: LanguageCode)

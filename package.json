@@ -13,13 +13,16 @@
   },
   "prettier": "@shopify/prettier-config",
   "dependencies": {
+    "@radix-ui/react-use-is-hydrated": "^0.1.0",
     "@remix-run/react": "^2.16.1",
     "@remix-run/server-runtime": "^2.16.1",
-    "graphql": "^16.10.0",
     "@shopify/hydrogen": "2025.1.4",
     "@shopify/remix-oxygen": "^2.0.12",
+    "graphql": "^16.10.0",
     "graphql-tag": "^2.12.6",
     "isbot": "^5.1.22",
+    "keen-slider": "^6.8.6",
+    "lucide-react": "^0.503.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },

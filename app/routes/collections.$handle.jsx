@@ -128,6 +128,24 @@ const PRODUCT_ITEM_FRAGMENT = `#graphql
         ...MoneyProductItem
       }
     }
+    variants(first: 1) {
+      nodes {
+        id
+        price {
+          amount
+        }
+        title
+        sku
+        image {
+          id
+          url
+        }
+        selectedOptions {
+          name
+          value
+        }
+      }
+    }
   }
 `;
 

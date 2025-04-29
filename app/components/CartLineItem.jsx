@@ -3,6 +3,8 @@ import {useVariantUrl} from '~/lib/variants';
 import {Link} from '@remix-run/react';
 import {ProductPrice} from './ProductPrice';
 import {useAside} from './Aside';
+import {Trash2} from 'lucide-react';
+
 
 /**
  * A single line item in the cart. It displays the product image, title, price.
@@ -19,7 +21,15 @@ export function CartLineItem({layout, line}) {
   const {close} = useAside();
 
   return (
-    <li key={id} className="cart-line">
+    <li
+      key={id}
+      className="relative flex gap-4 items-start border-b border-gray-200 py-4"
+    >
+      {/* Botón de eliminar en la esquina */}
+      <div className="absolute right-0">
+        <CartLineRemoveButton lineIds={[id]} disabled={!!line.isOptimistic} />
+      </div>
+
       {image && (
         <Image
           alt={title}
@@ -28,10 +38,11 @@ export function CartLineItem({layout, line}) {
           height={100}
           loading="lazy"
           width={100}
+          className="rounded-lg object-cover w-24 h-24"
         />
       )}
 
-      <div>
+      <div className="flex flex-col flex-1 pr-5">
         <Link
           prefetch="intent"
           to={lineItemUrl}
@@ -40,22 +51,24 @@ export function CartLineItem({layout, line}) {
               close();
             }
           }}
+          className="text-sm font-semibold hover:underline"
         >
-          <p>
-            <strong>{product.title}</strong>
-          </p>
+          {product.title}
         </Link>
+
         <ProductPrice price={line?.cost?.totalAmount} />
-        <ul>
+
+        <ul className="text-sm text-gray-500 mt-1 space-y-0.5">
           {selectedOptions.map((option) => (
             <li key={option.name}>
-              <small>
-                {option.name}: {option.value}
-              </small>
+              {option.name}: {option.value}
             </li>
           ))}
         </ul>
-        <CartLineQuantity line={line} />
+
+        <div className="mt-4">
+          <CartLineQuantity line={line} />
+        </div>
       </div>
     </li>
   );
@@ -74,31 +87,33 @@ function CartLineQuantity({line}) {
   const nextQuantity = Number((quantity + 1).toFixed(0));
 
   return (
-    <div className="cart-line-quantity">
-      <small>Quantity: {quantity} &nbsp;&nbsp;</small>
+    <div className="flex items-center justify-start gap-2 bg-gray-100 w-fit rounded-full">
       <CartLineUpdateButton lines={[{id: lineId, quantity: prevQuantity}]}>
         <button
-          aria-label="Decrease quantity"
+          aria-label="Disminuir cantidad"
           disabled={quantity <= 1 || !!isOptimistic}
           name="decrease-quantity"
           value={prevQuantity}
+          className="rounded-full bg-gray-100 hover:bg-gray-200 disabled:opacity-50 cursor-pointer w-8 h-8"
         >
-          <span>&#8722; </span>
+          <span className="text-lg">−</span>
         </button>
       </CartLineUpdateButton>
-      &nbsp;
+
+      {/* Cantidad en el centro */}
+      <span className="font-medium w-8 text-center text-sm">{quantity}</span>
+
       <CartLineUpdateButton lines={[{id: lineId, quantity: nextQuantity}]}>
         <button
-          aria-label="Increase quantity"
+          aria-label="Aumentar cantidad"
           name="increase-quantity"
           value={nextQuantity}
           disabled={!!isOptimistic}
+          className="rounded-full bg-gray-100 hover:bg-gray-200 disabled:opacity-50 cursor-pointer w-8 h-8" 
         >
-          <span>&#43;</span>
+          <span className="text-lg">＋</span>
         </button>
       </CartLineUpdateButton>
-      &nbsp;
-      <CartLineRemoveButton lineIds={[lineId]} disabled={!!isOptimistic} />
     </div>
   );
 }
@@ -120,8 +135,12 @@ function CartLineRemoveButton({lineIds, disabled}) {
       action={CartForm.ACTIONS.LinesRemove}
       inputs={{lineIds}}
     >
-      <button disabled={disabled} type="submit">
-        Remove
+      <button
+        disabled={disabled}
+        type="submit"
+        className="text-gray-400 hover:text-red-500 disabled:opacity-50 cursor-pointer"
+      >
+        <Trash2 size={20} />
       </button>
     </CartForm>
   );

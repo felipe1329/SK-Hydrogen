@@ -106,10 +106,11 @@ export default function Product() {
   const {title, descriptionHtml} = product;
 
   return (
-    <div className="product">
-      <ProductImage image={selectedVariant?.image} />
+    <div className="product pt-5 ">
+      <ProductImage images={product.images.nodes} />
       <div className="product-main">
         <h1>{title}</h1>
+        <span>{product.metafields?.find((field) => field?.key === "test")?.value}</span>
         <ProductPrice
           price={selectedVariant?.price}
           compareAtPrice={selectedVariant?.compareAtPrice}
@@ -194,6 +195,23 @@ const PRODUCT_FRAGMENT = `#graphql
     description
     encodedVariantExistence
     encodedVariantAvailability
+    images(first: 10) {
+      nodes {
+        id
+        url
+        altText
+        width
+        height
+      }
+    }
+    metafields(identifiers: [
+      {key: "test", namespace: "custom"},
+      {key: "info", namespace: "custom"}
+    ]) {
+      namespace
+      key
+      value
+    }
     options {
       name
       optionValues {
@@ -209,6 +227,11 @@ const PRODUCT_FRAGMENT = `#graphql
             }
           }
         }
+      }
+    }
+    variants(first: 1) {
+      nodes {
+        id
       }
     }
     selectedOrFirstAvailableVariant(selectedOptions: $selectedOptions, ignoreUnknownOptions: true, caseInsensitiveMatch: true) {

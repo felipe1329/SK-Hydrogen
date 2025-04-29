@@ -100,6 +100,24 @@ const COLLECTION_ITEM_FRAGMENT = `#graphql
         ...MoneyCollectionItem
       }
     }
+    variants(first: 1) {
+      nodes {
+        id
+        price {
+          amount
+        }
+        title
+        sku
+        image {
+          id
+          url
+        }
+        selectedOptions {
+          name
+          value
+        }
+      }
+    }
   }
 `;
 
